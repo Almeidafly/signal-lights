@@ -14,6 +14,7 @@ deliberate inversion: patch-cloud fixes what went dark. signal-lights never does
 pip install -e .[test]
 signal-lights scan tests/fixtures/wow_1977.json           # Big Ear 1977 "6EQUJ5" -> dark
 signal-lights scan tests/fixtures/bl_gbt_3C295_ku_cut.fil  # real GBT cut -> lit (Ku-band satellite)
+signal-lights scan-set data/spliced_*.h5                   # reject hits repeated across different sky targets
 python scripts/fetch_sample.py                             # 20 MB real Breakthrough Listen file, sha256-checked
 signal-lights scan data/blc52_guppi_60070_45462_3C295_0007.rawspec.0002.h5 --emit-dark out/
 ```
@@ -42,7 +43,7 @@ unchanged and checksum-verified, whenever anything is dark.
 
 ## Limitations
 
-* Simplified search: this is not a full turboSETI de-Doppler tree, and it has no ON/OFF cadence filter.
+* Simplified search: this is not a full turboSETI de-Doppler tree, and it has no ON/OFF cadence filter. `scan-set` does reject hits repeated across different targets.
 * The band list is coarse. A real ET signal inside a satellite band would be lit (false negative).
   The defaults lean toward labeling, not discarding: lit hits stay in the JSON too.
 * At 2.86 kHz resolution the Earth-frame (zero-drift) test cannot run. The tool says so instead of guessing.

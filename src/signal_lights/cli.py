@@ -42,11 +42,39 @@ def scan(path: str, snr_threshold: float = 10.0, emit_dark: str | None = None) -
         "telescope": obs.telescope, "source_name": obs.source_name,
         "input_sha256": before, "input_unchanged": before == after,
         "band_mhz": sorted([obs.freq_mhz(0), obs.freq_mhz(obs.nchan - 1)]),
-        "snr_threshold": snr_threshold,
+        "snr_threshold": snr_threshold, "foff_mhz": obs.foff_mhz,
         "counts": {"hits": len(results), "lit": len(results) - len(dark), "dark": len(dark)},
         "status": "dark" if dark else "lit",
         "rule": RULE, "passthrough": passthrough, "hits": results,
     }
+
+
+def scan_set(paths: list[str], snr_threshold: float = 10.0, tol_chans: float = 3.0) -> dict:
+    """Scan several observations; a dark hit that also appears (any light) in an observation of a
+    *different* sky target is relabeled lit as local interference. Labels only; data untouched."""
+    results = [scan(p, snr_threshold) for p in paths]
+    foffs = [abs(r["foff_mhz"]) for r in results if r.get("foff_mhz")]
+    tol = tol_chans * (max(foffs) if foffs else 0.0)
+    for i, r in enumerate(results):
+        for h in r["hits"]:
+            if h["light"] != "dark":
+                continue
+            others = sorted({o["source_name"] for j, o in enumerate(results)
+                             if j != i and o["source_name"] != r["source_name"]
+                             and any(abs(oh["freq_mhz"] - h["freq_mhz"]) <= tol for oh in o["hits"])})
+            h["also_in_targets"] = others
+            if others:
+                h["light"], h["known_source"] = "lit", "multi-target"
+                h["reason"] = (f"seen in multiple targets ({r['source_name']}, {', '.join(others)}) "
+                               f"within {tol * 1e3:.2f} kHz -> local interference")
+        dark = sum(h["light"] == "dark" for h in r["hits"])
+        r["counts"] = {"hits": len(r["hits"]), "lit": len(r["hits"]) - dark, "dark": dark}
+        r["status"] = "dark" if dark else "lit"
+    total_dark = sum(r["counts"]["dark"] for r in results)
+    return {"tool": "signal-lights", "mode": "scan-set", "tolerance_mhz": tol,
+            "targets": [r["source_name"] for r in results],
+            "counts": {"hits": sum(r["counts"]["hits"] for r in results), "dark": total_dark},
+            "status": "dark" if total_dark else "lit", "rule": RULE, "observations": results}
 
 
 def report(res: dict) -> str:
@@ -74,11 +102,25 @@ def main(argv=None) -> int:
     s.add_argument("--snr", type=float, default=10.0)
     s.add_argument("--emit-dark", metavar="DIR", help="copy the untouched original into DIR if anything is dark")
     s.add_argument("--json-only", action="store_true")
+    m = sub.add_parser("scan-set", help="scan several observations; reject hits repeated across different targets")
+    m.add_argument("files", nargs="+")
+    m.add_argument("--snr", type=float, default=10.0)
+    m.add_argument("--tol-chans", type=float, default=3.0, help="match tolerance in fine channels (default 3)")
+    m.add_argument("--json-only", action="store_true")
     a = ap.parse_args(argv)
+    if a.cmd == "scan-set":
+        res = scan_set(a.files, a.snr, a.tol_chans)
+        print(json.dumps(res, indent=2))
+        if not a.json_only:
+            print()
+            for r in res["observations"]:
+                print(report(r) + "\n")
+            print(f"scan-set: {res['counts']['dark']} dark hits remain across {len(res['targets'])} observations.")
+        return 0
     res = scan(a.file, a.snr, a.emit_dark)
     print(json.dumps(res, indent=2))
     if not a.json_only:
-        print("\n" + report(res), file=sys.stderr if a.json_only else sys.stdout)
+        print("\n" + report(res))
     return 0
 
 
