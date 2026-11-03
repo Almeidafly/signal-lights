@@ -55,3 +55,17 @@ def test_broad_hi_line_is_natural_but_narrow_wow_like_is_not():
     narrow = Hit(0, 0, 0, 1420.4556, 30.0, 1, 0.0, 9.6, 1.0)
     assert classify(broad, obs)["known_source"] == "natural-hi"
     assert classify(narrow, obs)["light"] == "dark"
+
+
+def test_us_allocation_bands():
+    obs = load(str(FIX))
+
+    def lab(f):
+        return classify(Hit(0, 0, 0, f, 20.0, 1, 0.0, 9.6, 1.0), obs)
+
+    assert "ARSR" in lab(1373.91)["reason"] and "ARSR" in lab(1303.6)["reason"]
+    assert "PCS" in lab(1907.8)["reason"] and "AWS" in lab(1750.0)["reason"]
+    assert "unlicensed PCS" in lab(1924.99)["reason"]
+    # protected radio-astronomy band stays out of the catalog
+    for f in (1395.0, 1400.0, 1420.4556, 1426.629):
+        assert lab(f)["light"] == "dark"

@@ -22,7 +22,18 @@ RFI_BANDS = [
     (1525.0, 1559.0, "Inmarsat / mobile-satellite downlink"),
     (1616.0, 1626.5, "Iridium satellites"),
     (1675.0, 1710.0, "meteorological-satellite downlink (GOES/NOAA/Meteosat, ITU 1675-1710 MHz)"),
-    (1930.0, 1995.0, "PCS cellular downlink"),
+    # US allocations, 47 CFR 2.106 (FCC/NTIA Table of Frequency Allocations), NTIA Manual (Redbook) ch. 4:
+    # 1300-1390 MHz is federal aeronautical radionavigation / radiolocation (ARSR-4 / FAA-DoD long-range
+    # air-route surveillance radars). 1215-1300 MHz is already covered by the GNSS entries above. The band stops
+    # at 1390 MHz, and 1400-1427 MHz (protected radio astronomy, footnote US246) is never listed.
+    (1300.0, 1390.0, "L-band long-range air-route surveillance radar (ARSR), 47 CFR 2.106 / NTIA Redbook"),
+    # AWS-1/AWS-3 mobile uplink, 47 CFR Part 27 (27.5(h), 27.5(j)).
+    (1710.0, 1780.0, "AWS cellular uplink (47 CFR Part 27)"),
+    # Broadband PCS, 47 CFR Part 24 (24.229): 1850-1915 MHz uplink (incl. H-block 1915-1920, Part 27),
+    # 1920-1930 MHz unlicensed PCS (47 CFR Part 15 Subpart D, e.g. DECT 6.0 phones), 1930-1995 MHz downlink.
+    (1850.0, 1920.0, "PCS cellular uplink (47 CFR Part 24 / Part 27 H-block)"),
+    (1920.0, 1930.0, "unlicensed PCS, e.g. DECT 6.0 cordless phones (47 CFR Part 15 Subpart D)"),
+    (1930.0, 1995.0, "PCS cellular downlink (47 CFR Part 24)"),
     (2110.0, 2200.0, "AWS/UMTS cellular downlink"),
     (2320.0, 2345.0, "SiriusXM satellite radio"),
     (3700.0, 4200.0, "C-band geostationary satellite downlink"),

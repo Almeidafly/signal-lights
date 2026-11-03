@@ -136,3 +136,38 @@ sky target. Only labels change, and every input sha256 was the same before and a
 Near misses that stay dark under the 8.58 kHz tolerance: 1921.540 (KIC8462852) vs 1921.529 (Kepler-992b) are
 11.4 kHz apart, and 1373.903 (KIC8462852) vs 1373.915 (3C295) are 11.4 kHz apart. These probably come from the same transmitters,
 but the rule is deliberately strict. A wider `--tol-chans` would light them, at the cost of rejecting more real signals.
+
+## US allocation bands (ARSR radar, AWS/PCS cellular) + scan-set
+
+New catalog entries, each cited in `classify.py`:
+* 1300–1390 MHz: federal aeronautical radionavigation/radiolocation, used by long-range air-route surveillance radar (ARSR).
+  Sources: 47 CFR 2.106 and the NTIA Redbook.
+* 1710–1780 MHz: AWS-1/AWS-3 uplink (47 CFR Part 27).
+* 1850–1920 MHz: PCS uplink, including the H-block (47 CFR Part 24/27).
+* 1920–1930 MHz: unlicensed PCS such as DECT phones (47 CFR Part 15 Subpart D).
+* 1930–1995 MHz: PCS downlink.
+
+The 1390–1427 MHz range is deliberately left out. A test checks that 1395, 1400, 1420.4556 and 1426.629 MHz stay dark.
+
+**Dark hits: 23 → 6** (out of 1963 hits). Every input sha256 was the same before and after the scan.
+
+| target | hits | lit | dark |
+|---|---|---|---|
+| 3C295 | 510 | 508 | 2 |
+| KIC8462852 | 472 | 469 | 3 |
+| kepler992b | 531 | 530 | 1 |
+| B0329+54 | 450 | 450 | 0 |
+
+| target | freq (MHz) | SNR | width (kHz) | drift fit (Hz/s, resolution) |
+|---|---|---|---|---|
+| 3C295 | 1641.211510 | 147.8 | 5.7 | -42 (24.0) |
+| 3C295 | 1627.429962 | 14.2 | 5.7 | -1.3e+02 (24.0) |
+| KIC8462852 | 1615.734100 | 70.6 | 20.0 | 32 (9.6) |
+| KIC8462852 | 1646.615982 | 19.8 | 2.9 | -24 (9.6) |
+| KIC8462852 | 1646.593094 | 13.2 | 2.9 | 1.6 (9.6) |
+| kepler992b | 1426.629066 | 16.7 | 2.9 | 6.1e-11 (9.6) |
+
+The four hits at 1615–1647 MHz sit next to, but outside, the bands we list. They fall in the L-band mobile-satellite
+*uplink* allocations: 1610–1626.5 MHz for Globalstar and Iridium, and 1626.5–1660.5 MHz for Inmarsat (47 CFR 2.106). These were not added,
+because they were not in this change's approved scope. 1426.629 MHz is inside the protected band, with zero fitted drift, at the
+resolution limit. It stays dark for a human to look at.
