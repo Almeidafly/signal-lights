@@ -1,0 +1,18 @@
+{
+  "name": "Wow! signal",
+  "telescope": "Big Ear Radio Observatory (Ohio State University)",
+  "date_utc": "1977-08-15T22:16:01Z",
+  "source_name": "Sagittarius (unidentified)",
+  "channel": 2,
+  "channel_2_printout": "6EQUJ5",
+  "alphabet": "0-9 then A-Z = 10..35, intensity in units of standard deviation above background",
+  "integration_s": 12,
+  "window_s": 72,
+  "frequency_mhz": 1420.4556,
+  "frequency_note": "1420.4556 MHz per Gray & Ellingsen / Kraus reanalysis; Ehman's original note gave 1420.3556 MHz. Both lie inside the protected 1400-1427 MHz radio-astronomy band.",
+  "channel_width_mhz": 0.010,
+  "references": [
+    "J. Ehman, 'The Big Ear Wow! Signal: What We Know and Don't Know About It After 20 Years' (bigear.org/wow20th.htm)",
+    "R. Gray & S. Ellingsen 2002, ApJ 578, 967"
+  ]
+}
