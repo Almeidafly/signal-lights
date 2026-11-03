@@ -34,7 +34,7 @@ def _robust_snr(spec: np.ndarray, block: int) -> np.ndarray:
     return snr
 
 
-def find_hits(obs: Observation, snr_threshold: float = 10.0, max_hits: int = 200) -> list[Hit]:
+def find_hits(obs: Observation, snr_threshold: float = 10.0, max_hits: int = 5000) -> list[Hit]:
     data = obs.data
     if obs.meta.get("already_snr_units"):
         # Big Ear: values are already SNR; one channel, time series = transit through beam.

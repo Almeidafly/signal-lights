@@ -46,3 +46,12 @@ def test_full_real_bl_file():
     res = scan(str(BIG))
     assert res["input_unchanged"] and res["counts"]["hits"] > 0
     assert all(h["known_source"] in {"rfi", "instrument"} for h in res["hits"] if h["light"] == "lit")
+
+
+def test_broad_hi_line_is_natural_but_narrow_wow_like_is_not():
+    # Classifier unit test with hand-built Hit objects (not data).
+    obs = load(str(FIX))  # foff ~2.86 kHz
+    broad = Hit(0, 77, 40, 1420.50, 88.0, 78, 0.0, 9.6, 1.0)
+    narrow = Hit(0, 0, 0, 1420.4556, 30.0, 1, 0.0, 9.6, 1.0)
+    assert classify(broad, obs)["known_source"] == "natural-hi"
+    assert classify(narrow, obs)["light"] == "dark"

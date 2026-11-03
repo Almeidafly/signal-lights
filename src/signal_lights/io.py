@@ -51,6 +51,18 @@ def read_h5(path: str) -> Observation:
         import hdf5plugin  # noqa: F401  (bitshuffle filter used by BL files)
     except ImportError:  # pragma: no cover
         pass
+    obs = _read_h5_raw(path, h5py)
+    if not obs.meta.get("nfpc") and obs.meta.get("telescope_id") == 6:
+        # BL GBT coarse channels are 187.5/64 = 2.9296875 MHz wide. Older gpuspec/spliced files
+        # omit nfpc, so infer it from the instrument config (metadata only; data untouched).
+        n = 2.9296875 / abs(obs.foff_mhz)
+        if abs(n - round(n)) < 1e-6:
+            obs.meta["nfpc"] = int(round(n))
+            obs.meta["nfpc_inferred"] = True
+    return obs
+
+
+def _read_h5_raw(path, h5py) -> Observation:
     with h5py.File(path, "r") as f:
         d = f["data"]
         a = {k: _b(d.attrs[k]) for k in d.attrs if k != "DIMENSION_LABELS"}
